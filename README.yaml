@@ -39,7 +39,7 @@ usage: |-
 
   ```hcl
   module "rotate_ssh" {
-    source          = "git::https://gitlab.com/guardianproject-ops/terraform-aws-lambda-secrets-manager-ssh-key-rotation.git?ref=tags/master"
+    source          = "git::https://gitlab.com/guardianproject-ops/terraform-aws-lambda-secrets-manager-ssh-key-rotation.git?ref=master"
 
     namespace       = var.namespace
     name            = var.name

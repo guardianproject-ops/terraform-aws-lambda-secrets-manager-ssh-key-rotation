@@ -15,7 +15,7 @@ resource "null_resource" "lambda" {
     build_number = timestamp()
   }
   provisioner "local-exec" {
-    command = "make artifact"
+    command = "cd ${path.module} && make artifact"
   }
 }
 
