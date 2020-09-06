@@ -22,7 +22,7 @@ def generate_key_pair(comment):
     key = rsa.generate_private_key(
             backend=crypto_default_backend(),
             public_exponent=65537,
-            key_size=2048
+            key_size=4096
             )
     private_key = key.private_bytes(
             crypto_serialization.Encoding.PEM,
@@ -47,12 +47,12 @@ def run_command(ip_addresses, username, private_key, command):
 
     client = paramiko.client.SSHClient()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    
+
     # connect and execute the command
     for ip in ip_addresses:
         try:
             print("SSH: Connecting to %s as user %s." % (ip, username))
-            client.connect(ip, 
+            client.connect(ip,
                     username = username,
                     pkey = key,
                     look_for_keys = False)
