@@ -1,0 +1,63 @@
+---
+#
+# This is the canonical configuration for the `README.md`
+# Run `make readme` to rebuild the `README.md`
+#
+
+# Name of this project
+name: terraform-aws-lambda-secrets-manager-ssh-key-rotation
+
+# License of this project
+license: "AGPL3"
+
+# Canonical GitLab repo
+gitlab_repo: guardianproject-ops/terraform-aws-lambda-secrets-manager-ssh-key-rotation
+
+# Badges to display
+badges: []
+
+# Short description of this project
+description: |-
+  This is a terraform module that creates a lambda function that rotates SSH keys
+  on EC2 instances via AWS Secrets Manager.
+
+introduction: |-
+
+  This module is based off the AWS example:
+
+    * [How to use AWS Secrets Manager to securely store and rotate SSH key pairs](https://aws.amazon.com/blogs/security/how-to-use-aws-secrets-manager-securely-store-rotate-ssh-key-pairs/)
+
+  The original source is from
+  [aws-samples/aws-secrets-manager-ssh-key-rotation](https://github.com/aws-samples/aws-secrets-manager-ssh-key-rotation)
+  and it is (C) Amazon and licensed under MIT-0.
+
+
+# How to use this project
+usage: |-
+
+  Note that `master` is used in the examples, but you should instead pin to the latest tag.
+
+  ```hcl
+  module "rotate_ssh" {
+    source          = "git::https://gitlab.com/guardianproject-ops/terraform-aws-lambda-secrets-manager-ssh-key-rotation.git?ref=tags/master"
+
+    namespace       = var.namespace
+    name            = var.name
+    stage           = var.stage
+    delimiter       = var.delimiter
+    attributes      = ["ssh-key-rotate"]
+    tags            = var.tags
+    server_username = "admin"
+    tag_name        = "RotateSSHKeys"
+    tag_value       = "true"
+  }
+  ```
+
+include:
+  - "docs/terraform.md"
+
+# Contributors to this project
+contributors:
+  - name: "Abel Luck"
+    gitlab: "abelxluck"
+    gravatar: 0f605397e0ead93a68e1be26dc26481a
