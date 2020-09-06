@@ -62,6 +62,7 @@ def lambda_handler(event, context):
 
     # Make sure the version is staged correctly
     metadata = service_client.describe_secret(SecretId=arn)
+    print("Metadata", metadata)
     if not metadata['RotationEnabled']:
         print("Secret %s is not enabled for rotation." % arn)
         raise ValueError("Secret %s is not enabled for rotation." % arn)
@@ -76,6 +77,7 @@ def lambda_handler(event, context):
         print("Secret version %s not set as AWSPENDING for rotation of secret %s." % (token, arn))
         raise ValueError("Secret version %s not set as AWSPENDING for rotation of secret %s." % (token, arn))
 
+    print("Executing step", step)
     if step == "createSecret":
         create_secret(service_client, arn, token, context)
 
@@ -109,14 +111,15 @@ def create_secret(service_client, arn, token, context):
         ResourceNotFoundException: If the secret with the specified arn and stage does not exist
 
     """
-    # Make sure the current secret exists
-    current_dict = get_secret_dict(service_client, arn, "AWSCURRENT")
-
-    # Now try to get the secret version, if that fails, put a new secret
     try:
+        # Make sure the current secret exists
+        print("Retrieving current version")
+        current_dict = get_secret_dict(service_client, arn, "AWSCURRENT")
+        # Now try to get the secret version, if that fails, put a new secret
         service_client.get_secret_value(SecretId=arn, VersionId=token, VersionStage="AWSPENDING")
         print("createSecret: Successfully retrieved secret for %s." % arn)
     except service_client.exceptions.ResourceNotFoundException:
+        current_dict = dict()
 
         # generate a key-pair
         print("createSecret: Generating a key pair with token %s." % (token))

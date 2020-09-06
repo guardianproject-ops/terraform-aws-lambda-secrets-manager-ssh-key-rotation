@@ -1,17 +1,19 @@
 data "aws_caller_identity" "current" {}
+data "aws_region" "current" {}
 
 module "label" {
-  source     = "git::https://github.com/cloudposse/terraform-null-label.git?ref=tags/0.19.2"
-  namespace  = var.namespace
-  stage      = var.stage
-  name       = var.name
-  delimiter  = var.delimiter
-  attributes = var.attributes
-  tags       = var.tags
+  source      = "git::https://github.com/cloudposse/terraform-null-label.git?ref=tags/0.19.2"
+  namespace   = var.namespace
+  stage       = var.stage
+  environment = var.environment
+  name        = var.name
+  delimiter   = var.delimiter
+  attributes  = var.attributes
+  tags        = var.tags
 }
 
 resource "null_resource" "lambda" {
-  triggers {
+  triggers = {
     build_number = timestamp()
   }
   provisioner "local-exec" {
@@ -20,14 +22,11 @@ resource "null_resource" "lambda" {
 }
 
 data "archive_file" "lambda_zip" {
-  depends_on = [
-    resource.null_resource.lambda
-  ]
   type        = "zip"
   source_dir  = "${path.module}/artifacts/lambda"
-  output_path = "${path.module}/artifacts/lambda.zip"
+  output_path = "${path.module}/artifacts/lambda-${null_resource.lambda.triggers.build_number}.zip"
+  depends_on  = [null_resource.lambda]
 }
-
 
 data "aws_iam_policy_document" "assume" {
   statement {
@@ -54,17 +53,6 @@ resource "aws_iam_role" "lambda" {
 data "aws_iam_policy_document" "lambda" {
   statement {
     effect = "Allow"
-
-    actions = [
-      "logs:CreateLogGroup",
-      "logs:CreateLogStream",
-      "logs:PutLogEvents"
-    ]
-
-    resources = ["*"]
-  }
-  statement {
-    effect = "Allow"
     sid    = "SecretsManagerActions"
 
     actions = [
@@ -74,25 +62,26 @@ data "aws_iam_policy_document" "lambda" {
       "secretsmanager:UpdateSecretVersionStage"
     ]
     resources = [
-      "arn:aws:secretsmanager:&{AWS::Region}:&{AWS::AccountId}:secret:/${module.label.id}/ssh*"
+      "arn:aws:secretsmanager:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:secret:${var.secret_prefix}"
     ]
     condition {
       test     = "StringEquals"
       variable = "secretsmanager:resource/AllowRotationLambdaArn"
-      values   = ["arn:aws:lambda:&{AWS::Region}:&{AWS::AccountId}:function:RotateSSH"]
+      values   = [aws_lambda_function.default.arn]
+
     }
   }
   statement {
     effect    = "Allow"
     sid       = "SSMRunShellScriptDocument"
     actions   = ["ssm:SendCommand"]
-    resources = ["arn:aws:ssm:&{AWS::Region}::document/AWS-RunShellScript"]
+    resources = ["arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}::document/AWS-RunShellScript"]
   }
   statement {
     effect    = "Allow"
     sid       = "SSMRunShellScriptOnTaggedInstances"
     actions   = ["ssm:SendCommand"]
-    resources = ["arn:aws:ec2:&{AWS::Region}:&{AWS::AccountId}:instance/*"]
+    resources = ["arn:aws:ec2:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:instance/*"]
     condition {
       test     = "StringEquals"
       variable = "ssm:resourceTag/${var.tag_name}"
@@ -143,21 +132,29 @@ resource "aws_iam_role_policy_attachment" "lambda_eni" {
 
 resource "aws_lambda_function" "default" {
   function_name    = module.label.id
-  filename         = "${path.module}/artifacts/lambda.zip"
-  handler          = "lambda.handler"
+  filename         = data.archive_file.lambda_zip.output_path
+  handler          = "rotate.lambda_handler"
   role             = aws_iam_role.lambda.arn
   source_code_hash = data.archive_file.lambda_zip.output_base64sha256
-  runtime          = "python3.6"
+  runtime          = "python3.7"
   timeout          = 300
   tags             = module.label.tags
 
   environment {
     variables = {
-      USERNAME = var.serve_username
+      USERNAME = var.server_username
       TAGNAME  = var.tag_name
       TAGVALUE = var.tag_value
     }
   }
+}
+
+
+resource "aws_lambda_permission" "secretsmanager" {
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.default.function_name
+  principal     = "secretsmanager.amazonaws.com"
+  statement_id  = "AllowExecutionFromSecretsManager1"
 }
 
 resource "aws_lambda_alias" "default" {

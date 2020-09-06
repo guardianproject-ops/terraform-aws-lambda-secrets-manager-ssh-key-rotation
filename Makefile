@@ -6,7 +6,7 @@ artifact:
 	cd lambda && $(MAKE)
 
 dist-clean:
-	rm -rf lambda/package artifacts
+	rm -rf lambda/package artifacts/lambda/* artifacts.zip
 
 
 ## Lint terraform code

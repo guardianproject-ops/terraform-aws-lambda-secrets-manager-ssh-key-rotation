@@ -12,6 +12,13 @@ variable "namespace" {
 variable "stage" {
   type        = string
   description = "Environment (e.g. dev, prod, test)"
+  default     = ""
+}
+
+variable "environment" {
+  type        = string
+  description = "Environment (e.g. dev, prod, test)"
+  default     = ""
 }
 
 variable "name" {
@@ -43,4 +50,8 @@ variable "tag_value" {
   type        = string
   default     = "true"
   description = "Tag value that must be set to locate the instances which should be rotated"
+}
+variable "secret_prefix" {
+  type        = string
+  description = "The Secrets Manager secret prefix, including the wild card if you want one. e.g., 'foo-bar/ssh_*'"
 }
