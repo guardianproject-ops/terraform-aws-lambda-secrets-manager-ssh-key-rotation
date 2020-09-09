@@ -1,17 +1,6 @@
 data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
 
-module "label" {
-  source      = "git::https://github.com/cloudposse/terraform-null-label.git?ref=tags/0.19.2"
-  namespace   = var.namespace
-  stage       = var.stage
-  environment = var.environment
-  name        = var.name
-  delimiter   = var.delimiter
-  attributes  = var.attributes
-  tags        = var.tags
-}
-
 resource "null_resource" "lambda" {
   triggers = {
     build_number = timestamp()
@@ -44,9 +33,9 @@ data "aws_iam_policy_document" "assume" {
 }
 
 resource "aws_iam_role" "lambda" {
-  name               = module.label.id
+  name               = module.this.id
   assume_role_policy = data.aws_iam_policy_document.assume.json
-  tags               = module.label.tags
+  tags               = module.this.tags
 }
 
 
@@ -110,7 +99,7 @@ data "aws_iam_policy_document" "lambda" {
 }
 
 resource "aws_iam_policy" "lambda" {
-  name        = module.label.id
+  name        = module.this.id
   description = "Allow rotation of ssh keys on tagged instances"
   policy      = data.aws_iam_policy_document.lambda.json
 }
@@ -131,14 +120,14 @@ resource "aws_iam_role_policy_attachment" "lambda_eni" {
 }
 
 resource "aws_lambda_function" "default" {
-  function_name    = module.label.id
+  function_name    = module.this.id
   filename         = data.archive_file.lambda_zip.output_path
   handler          = "rotate.lambda_handler"
   role             = aws_iam_role.lambda.arn
   source_code_hash = data.archive_file.lambda_zip.output_base64sha256
   runtime          = "python3.7"
   timeout          = 300
-  tags             = module.label.tags
+  tags             = module.this.tags
 
   environment {
     variables = {
