@@ -3,7 +3,7 @@ data "aws_region" "current" {}
 
 resource "null_resource" "lambda" {
   triggers = {
-    build_number = timestamp()
+    build_number = var.build_number
   }
   provisioner "local-exec" {
     command = "cd ${path.module} && make artifact"
