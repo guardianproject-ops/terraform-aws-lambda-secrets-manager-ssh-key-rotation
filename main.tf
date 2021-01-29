@@ -1,21 +1,14 @@
+module "label" {
+  source  = "cloudposse/label/null"
+  version = "0.22.1"
+
+  context    = module.this.context
+  attributes = ["lambda"]
+}
+
 data "aws_caller_identity" "current" {}
+
 data "aws_region" "current" {}
-
-resource "null_resource" "lambda" {
-  triggers = {
-    build_number = var.build_number
-  }
-  provisioner "local-exec" {
-    command = "cd ${path.module} && make artifact"
-  }
-}
-
-data "archive_file" "lambda_zip" {
-  type        = "zip"
-  source_dir  = "${path.module}/artifacts/lambda"
-  output_path = "${path.module}/artifacts/lambda-${null_resource.lambda.triggers.build_number}.zip"
-  depends_on  = [null_resource.lambda]
-}
 
 data "aws_iam_policy_document" "assume" {
   statement {
@@ -31,13 +24,6 @@ data "aws_iam_policy_document" "assume" {
     ]
   }
 }
-
-resource "aws_iam_role" "lambda" {
-  name               = module.this.id
-  assume_role_policy = data.aws_iam_policy_document.assume.json
-  tags               = module.this.tags
-}
-
 
 data "aws_iam_policy_document" "lambda" {
   statement {
@@ -56,8 +42,7 @@ data "aws_iam_policy_document" "lambda" {
     condition {
       test     = "StringEquals"
       variable = "secretsmanager:resource/AllowRotationLambdaArn"
-      values   = [aws_lambda_function.default.arn]
-
+      values   = [module.lambda_function.this_lambda_function_arn]
     }
   }
   statement {
@@ -104,51 +89,38 @@ resource "aws_iam_policy" "lambda" {
   policy      = data.aws_iam_policy_document.lambda.json
 }
 
-resource "aws_iam_role_policy_attachment" "lambda" {
-  role       = aws_iam_role.lambda.name
-  policy_arn = aws_iam_policy.lambda.arn
-}
+module "lambda_function" {
+  source = "terraform-aws-modules/lambda/aws"
 
-resource "aws_iam_role_policy_attachment" "lambda_execution" {
-  role       = aws_iam_role.lambda.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-}
-
-resource "aws_iam_role_policy_attachment" "lambda_eni" {
-  role       = aws_iam_role.lambda.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaENIManagementAccess"
-}
-
-resource "aws_lambda_function" "default" {
-  function_name    = module.this.id
-  filename         = data.archive_file.lambda_zip.output_path
-  handler          = "rotate.lambda_handler"
-  role             = aws_iam_role.lambda.arn
-  source_code_hash = data.archive_file.lambda_zip.output_base64sha256
-  runtime          = "python3.7"
-  timeout          = 300
-  tags             = module.this.tags
-
-  environment {
-    variables = {
-      USERNAME = var.server_username
-      TAGNAME  = var.tag_name
-      TAGVALUE = var.tag_value
+  function_name = module.label.id
+  description   = "Rotates SSH keys on EC2 instances"
+  handler       = "rotate.lambda_handler"
+  runtime       = var.python_runtime_version
+  source_path   = "${path.module}/lambda/"
+  allowed_triggers = {
+    "AllowExecutionFromSecretsManager1" = {
+      principal = "secretsmanager.amazonaws.com"
+      action    = "lambda:InvokeFunction"
     }
   }
+  publish         = true
+  attach_policies = true
+  policies = [
+    "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+    "arn:aws:iam::aws:policy/service-role/AWSLambdaENIManagementAccess"
+  ]
+  number_of_policies                = 2
+  cloudwatch_logs_retention_in_days = 14
+  cloudwatch_logs_tags              = module.label.tags
+  environment_variables = {
+    USERNAME = var.server_username
+    TAGNAME  = var.tag_name
+    TAGVALUE = var.tag_value
+  }
+  tags = module.label.tags
 }
 
-
-resource "aws_lambda_permission" "secretsmanager" {
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.default.function_name
-  principal     = "secretsmanager.amazonaws.com"
-  statement_id  = "AllowExecutionFromSecretsManager1"
-}
-
-resource "aws_lambda_alias" "default" {
-  name             = "default"
-  description      = "Use latest version as default"
-  function_name    = aws_lambda_function.default.function_name
-  function_version = "$LATEST"
+resource "aws_iam_role_policy_attachment" "lambda" {
+  role       = module.lambda_function.lambda_role_name
+  policy_arn = aws_iam_policy.lambda.arn
 }

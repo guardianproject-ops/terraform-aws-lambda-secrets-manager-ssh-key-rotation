@@ -1,6 +1,9 @@
 output "lambda" {
-  description = "the lambda resource output"
-  value       = aws_lambda_function.default
+  value = module.lambda_function
+}
+
+output "lambda_arn" {
+  value = module.lambda_function.this_lambda_function_arn
 }
 
 output "tag_name" {

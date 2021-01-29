@@ -18,8 +18,8 @@ variable "secret_prefix" {
   description = "The Secrets Manager secret prefix, including the wild card if you want one. e.g., 'foo-bar/ssh_*'"
 }
 
-variable "build_number" {
+variable "python_runtime_version" {
   type        = string
-  description = "Any time this value changes, the lambda will be rebuilt from source. The value it self has no meaning."
-  default     = "1"
+  default     = "python3.7"
+  description = "lambda function runtime. the same version must be available in the controller's system PATH."
 }
