@@ -96,7 +96,7 @@ module "lambda_function" {
   description   = "Rotates SSH keys on EC2 instances"
   handler       = "rotate.lambda_handler"
   runtime       = var.python_runtime_version
-  timeout       = 300
+  timeout       = var.lambda_timeout_seconds
   source_path   = "${path.module}/lambda/"
   allowed_triggers = {
     "AllowExecutionFromSecretsManager1" = {
@@ -116,9 +116,10 @@ module "lambda_function" {
   cloudwatch_logs_retention_in_days = 14
   cloudwatch_logs_tags              = module.label.tags
   environment_variables = {
-    USERNAME = var.server_username
-    TAGNAME  = var.tag_name
-    TAGVALUE = var.tag_value
+    USERNAME  = var.server_username
+    TAGNAME   = var.tag_name
+    TAGVALUE  = var.tag_value
+    LOG_LEVEL = var.lambda_log_level
   }
   tags = module.label.tags
 }
