@@ -226,7 +226,7 @@ def test_secret(service_client, arn, token, context):
         % (command, USERNAME)
     )
     ssh.run_command(ip_addresses, USERNAME, pending_dict[PRIVATE_KEY], command)
-    logger.info("testSecret: SSH test succeeded" % (command))
+    logger.info("testSecret: SSH test succeeded")
 
 
 def finish_secret(service_client, arn, token, context):

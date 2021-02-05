@@ -89,6 +89,49 @@ resource "aws_iam_policy" "lambda" {
   policy      = data.aws_iam_policy_document.lambda.json
 }
 
+locals {
+  vpc_enabled = var.vpc_subnet_ids != null
+}
+
+data "aws_vpc" "lambda" {
+  id = var.vpc_id
+}
+
+resource "aws_security_group" "lambda" {
+  count = local.vpc_enabled ? 1 : 0
+
+  name        = module.label.id
+  description = "Allows SSH Key Rotation lambda access to ssh instances"
+  vpc_id      = var.vpc_id
+  tags        = module.label.tags
+}
+
+resource "aws_security_group_rule" "egress" {
+  count = local.vpc_enabled ? 1 : 0
+
+  description = "Allow all egress traffic"
+  from_port   = 0
+  to_port     = 0
+  protocol    = "-1"
+  cidr_blocks = ["0.0.0.0/0"]
+  #cidr_blocks       = [data.aws_vpc.lambda.cidr_block]
+  security_group_id = aws_security_group.lambda[0].id
+  type              = "egress"
+}
+
+resource "aws_security_group_rule" "ingress" {
+  count = local.vpc_enabled ? 1 : 0
+
+  description = "Allow ingress traffic from the VPC CIDR block"
+  from_port   = 0
+  to_port     = 0
+  protocol    = "-1"
+  cidr_blocks = ["0.0.0.0/0"]
+  #cidr_blocks       = [data.aws_vpc.lambda.cidr_block]
+  security_group_id = aws_security_group.lambda[0].id
+  type              = "ingress"
+}
+
 module "lambda_function" {
   source = "terraform-aws-modules/lambda/aws"
 
@@ -115,6 +158,9 @@ module "lambda_function" {
   number_of_policies                = 2
   cloudwatch_logs_retention_in_days = 14
   cloudwatch_logs_tags              = module.label.tags
+  attach_network_policy             = var.attach_network_policy
+  vpc_subnet_ids                    = var.vpc_subnet_ids
+  vpc_security_group_ids            = local.vpc_enabled ? [aws_security_group.lambda[0].id] : null
   environment_variables = {
     USERNAME  = var.server_username
     TAGNAME   = var.tag_name

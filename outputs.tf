@@ -17,3 +17,7 @@ output "tag_value" {
 output "server_username" {
   value = var.server_username
 }
+
+output "security_group_id" {
+  value = element(concat(aws_security_group.lambda.*.id, [""]), 0)
+}
