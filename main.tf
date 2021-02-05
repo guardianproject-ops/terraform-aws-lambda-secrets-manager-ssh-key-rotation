@@ -96,6 +96,7 @@ module "lambda_function" {
   description   = "Rotates SSH keys on EC2 instances"
   handler       = "rotate.lambda_handler"
   runtime       = var.python_runtime_version
+  timeout       = 300
   source_path   = "${path.module}/lambda/"
   allowed_triggers = {
     "AllowExecutionFromSecretsManager1" = {
