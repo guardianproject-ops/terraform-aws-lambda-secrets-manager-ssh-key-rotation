@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.0.0](https://gitlab.com/guardianproject-ops/terraform-aws-lambda-secrets-manager-ssh-key-rotation/compare/0.1.2...1.0.0) (2021-02-05)
+
+
+### ⚠ BREAKING CHANGES
+
+* improve reliability of lambda deployment
+
+### Features
+
+* remove the initial boot key if it exists ([1ea359c](https://gitlab.com/guardianproject-ops/terraform-aws-lambda-secrets-manager-ssh-key-rotation/commit/1ea359c3be19ca1738fbd4405b88b6532261d4c0))
+* Support running lambda in private vpc ([af03efd](https://gitlab.com/guardianproject-ops/terraform-aws-lambda-secrets-manager-ssh-key-rotation/commit/af03efd0bd3521a89fe76f0e94097096fa214234))
+* support user config of log level and function timeout ([04fd6d3](https://gitlab.com/guardianproject-ops/terraform-aws-lambda-secrets-manager-ssh-key-rotation/commit/04fd6d3ea2cf95857ca28d94b7fc82d4f38abb34))
+
+
+### Bug Fixes
+
+* do not publish a version, but always use LATEST ([2b1c999](https://gitlab.com/guardianproject-ops/terraform-aws-lambda-secrets-manager-ssh-key-rotation/commit/2b1c999b47227f77a8b95d3032c1d14ab92de44b))
+* improve debug logging ([5f7a4fa](https://gitlab.com/guardianproject-ops/terraform-aws-lambda-secrets-manager-ssh-key-rotation/commit/5f7a4fa13c9ca44d6c6669fe06da090ca6ed6609))
+* improve debug, info and error logging of lambda ([e9b59b9](https://gitlab.com/guardianproject-ops/terraform-aws-lambda-secrets-manager-ssh-key-rotation/commit/e9b59b96eeb004de8b5d54c68e19f1f63a4066e8))
+* improve reliability of lambda deployment ([8e83ab0](https://gitlab.com/guardianproject-ops/terraform-aws-lambda-secrets-manager-ssh-key-rotation/commit/8e83ab011b78461918e67d1d993d64cc72266fbd))
+* increase lambda timeout to 5 minutes ([cbe65f6](https://gitlab.com/guardianproject-ops/terraform-aws-lambda-secrets-manager-ssh-key-rotation/commit/cbe65f6a33523049218df6b02d3bced44890582c))
+* runshellscript permission doesn't need account id ([1b36b37](https://gitlab.com/guardianproject-ops/terraform-aws-lambda-secrets-manager-ssh-key-rotation/commit/1b36b372146fb6c6c96531fcef098fd6d6791b0d))
+* update null-label to 0.24.1 ([394a26f](https://gitlab.com/guardianproject-ops/terraform-aws-lambda-secrets-manager-ssh-key-rotation/commit/394a26f86cbfaa64289e6fdf6b2b5c6ce3acfc26))
+
 ### [0.1.2](https://gitlab.com/guardianproject-ops/terraform-aws-lambda-secrets-manager-ssh-key-rotation/compare/0.1.1...0.1.2) (2021-01-28)
 
 
