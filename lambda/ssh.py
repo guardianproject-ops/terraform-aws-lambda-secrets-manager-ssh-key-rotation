@@ -3,14 +3,18 @@
 from cryptography.hazmat.primitives import serialization as crypto_serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.backends import default_backend as crypto_default_backend
+from aws_lambda_powertools import Logger
 import paramiko
 import io
-import boto3
-import json
+
+
+logger = Logger()
+
 
 class InvalidParameterError(Exception):
     def __init__(self, message):
         self.message = message
+
 
 class SSHCommandError(Exception):
     def __init__(self, ip, nested_exception):
@@ -20,23 +24,23 @@ class SSHCommandError(Exception):
 
 def generate_key_pair(comment):
     key = rsa.generate_private_key(
-            backend=crypto_default_backend(),
-            public_exponent=65537,
-            key_size=4096
-            )
+        backend=crypto_default_backend(), public_exponent=65537, key_size=4096
+    )
     private_key = key.private_bytes(
-            crypto_serialization.Encoding.PEM,
-            crypto_serialization.PrivateFormat.TraditionalOpenSSL,
-            crypto_serialization.NoEncryption())
-    public_key = key.public_key().public_bytes(
-            crypto_serialization.Encoding.OpenSSH,
-            crypto_serialization.PublicFormat.OpenSSH
-            )
+        crypto_serialization.Encoding.PEM,
+        crypto_serialization.PrivateFormat.TraditionalOpenSSL,
+        crypto_serialization.NoEncryption(),
+    )
 
-    private_key_str = private_key.decode('utf-8')
-    public_key_str = public_key.decode('utf-8') + " " + comment
+    public_key = key.public_key().public_bytes(
+        crypto_serialization.Encoding.OpenSSH, crypto_serialization.PublicFormat.OpenSSH
+    )
+
+    private_key_str = private_key.decode("utf-8")
+    public_key_str = public_key.decode("utf-8") + " " + comment
 
     return [private_key_str, public_key_str]
+
 
 def run_command(ip_addresses, username, private_key, command):
     private_key_str = io.StringIO()
@@ -51,12 +55,12 @@ def run_command(ip_addresses, username, private_key, command):
     # connect and execute the command
     for ip in ip_addresses:
         try:
-            print("SSH: Connecting to %s as user %s." % (ip, username))
-            client.connect(ip,
-                    username = username,
-                    pkey = key,
-                    look_for_keys = False)
+            logger.info("SSH: Connecting to %s as user %s." % (ip, username))
+            client.connect(ip, username=username, pkey=key, look_for_keys=False)
             stdin, stdout, stderr = client.exec_command(command)
-            print("SSH: Successfully executed command '%s' on %s as user %s." % (command, ip, username))
+            logger.info(
+                "SSH: Successfully executed command '%s' on %s as user %s."
+                % (command, ip, username)
+            )
         finally:
             client.close()
