@@ -45,7 +45,7 @@ def lambda_handler(event, context):
         KeyError: If the event parameters do not contain the expected keys
 
     """
-    logger.debug("event", extra=event)
+    logger.debug("event", extra={"event": event})
     tag_name = os.environ["TAGNAME"]
     tag_value = os.environ["TAGVALUE"]
 
@@ -62,7 +62,7 @@ def lambda_handler(event, context):
 
     # Make sure the version is staged correctly
     metadata = service_client.describe_secret(SecretId=arn)
-    logger.debug("Metadata", extra=metadata)
+    logger.debug("Metadata", extra={"metadata": metadata})
     if not metadata["RotationEnabled"]:
         logger.info("Secret %s is not enabled for rotation." % arn)
         raise ValueError("Secret %s is not enabled for rotation." % arn)
