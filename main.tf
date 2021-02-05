@@ -104,7 +104,9 @@ module "lambda_function" {
       action    = "lambda:InvokeFunction"
     }
   }
-  publish         = true
+  publish                                 = false
+  create_current_version_allowed_triggers = false
+
   attach_policies = true
   policies = [
     "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
