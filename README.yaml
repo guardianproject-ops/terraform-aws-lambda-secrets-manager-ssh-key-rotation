@@ -40,17 +40,46 @@ usage: |-
   ```hcl
   module "rotate_ssh" {
     source          = "git::https://gitlab.com/guardianproject-ops/terraform-aws-lambda-secrets-manager-ssh-key-rotation.git?ref=master"
-
-    namespace       = var.namespace
-    name            = var.name
-    stage           = var.stage
-    delimiter       = var.delimiter
     attributes      = ["ssh-key-rotate"]
-    tags            = var.tags
     server_username = "admin"
     tag_name        = "RotateSSHKeys"
     tag_value       = "true"
+    context         = module.this.context
   }
+
+  resource "aws_secretsmanager_secret" "ssh_key" {
+    name        = "${module.this.id}/ssh_key"
+    description = "SSH Key managed by secrets manager"
+  }
+
+  resource "aws_secretsmanager_secret_rotation" "ssh_key" {
+    secret_id           = aws_secretsmanager_secret.ssh_key.id
+    rotation_lambda_arn = module.rotate_ssh.lambda_arn
+
+    rotation_rules {
+      automatically_after_days = 6
+    }
+  }
+
+  # allow the lambda to ssh into your ec2 instance
+  resource "aws_security_group" "ssh_rotate" {
+    name   = "${module.this.id}-ssh-rotate"
+    vpc_id = "...."
+
+    ingress {
+      from_port = 22
+      to_port   = 22
+      protocol  = "tcp"
+      security_groups = [
+        module.rotate_ssh.security_group_id
+      ]
+    }
+
+    tags = module.this.tags
+  }
+
+  # not shown: the ec2 instance with this security group attached
+
   ```
 
 include:
