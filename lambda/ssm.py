@@ -54,7 +54,7 @@ class SSM:
         commands = [
             f"key_file=~{self.username}/.ssh/authorized_keys",
             f'echo "Removing public key with comment {previous_version} from authorized_keys file for {self.username}, original file is stored with .bak extension" ',
-            f"sed -i'.bak' \"/{previous_version}/d\" $key_file",
+            f'sed -i\'.bak\' -e "/{previous_version}/d" -e "/INITIAL-KEY-ROTATE-ME/d" $key_file',
         ]
         response = self.send_command(commands, "delete_key", previous_version)
         return response["Command"]["CommandId"]
@@ -123,7 +123,7 @@ class SSM:
                         command_id = c["CommandId"]
                         break
 
-        if command_id == None:
+        if command_id is None:
             # Could not find a Successful command, flag an error
             raise CommandError(
                 "Run Command not found",
