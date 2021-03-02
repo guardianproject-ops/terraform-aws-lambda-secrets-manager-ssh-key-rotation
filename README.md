@@ -78,6 +78,10 @@ The original source is from
 and it is (C) Amazon and licensed under MIT-0.
 
 
+## Requirements
+
+
+* Docker - this module uses docker on the host to build and package the python code in a cross-compatible way
 
 ## Usage
 

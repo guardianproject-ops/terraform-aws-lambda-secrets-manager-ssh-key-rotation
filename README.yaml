@@ -31,6 +31,9 @@ introduction: |-
   [aws-samples/aws-secrets-manager-ssh-key-rotation](https://github.com/aws-samples/aws-secrets-manager-ssh-key-rotation)
   and it is (C) Amazon and licensed under MIT-0.
 
+requirements: |-
+
+  * Docker - this module uses docker on the host to build and package the python code in a cross-compatible way
 
 # How to use this project
 usage: |-
