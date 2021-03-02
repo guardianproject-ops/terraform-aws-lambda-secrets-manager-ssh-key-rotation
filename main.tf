@@ -167,6 +167,13 @@ module "lambda_function" {
     TAGVALUE  = var.tag_value
     LOG_LEVEL = var.lambda_log_level
   }
+
+  build_in_docker   = true
+  docker_file       = "${path.module}/lambda/Dockerfile"
+  docker_build_root = "${path.module}/lambda"
+  docker_image      = "terraform-aws-lambda-secrets-manager-ssh-key-rotation"
+  #docker_pip_cache      = true
+
   tags = module.label.tags
 }
 
