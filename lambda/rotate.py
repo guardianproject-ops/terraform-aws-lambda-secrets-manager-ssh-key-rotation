@@ -220,10 +220,9 @@ def test_secret(service_client, arn, token, context):
     logger.info("testSecret: getting instance IDs for version %s" % (token))
     ssm = SSM(context, TARGETS, USERNAME)
     ip_addresses = ssm.get_addrs_for_add_key(token)
-
     logger.info(
-        "testSecret: Performing SSH test by invoking command '%s' on remote host for user '%s'"
-        % (command, USERNAME)
+        "testSecret: Performing SSH test by invoking command '%s' on remote host for user '%s' for ip addresses %s"
+        % (command, USERNAME, str(ip_addresses))
     )
     ssh.run_command(ip_addresses, USERNAME, pending_dict[PRIVATE_KEY], command)
     logger.info("testSecret: SSH test succeeded")

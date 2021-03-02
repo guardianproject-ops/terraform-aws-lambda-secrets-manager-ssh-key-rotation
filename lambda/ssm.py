@@ -4,6 +4,10 @@ import boto3
 import time
 import datetime
 
+from aws_lambda_powertools import Logger
+
+logger = Logger()
+
 # Loop until less than this time is remaining
 MIN_REMAINING_TIME = 20 * 1000  # 20 seconds
 
@@ -32,7 +36,7 @@ class SSM:
             Targets=self.targets,
             DocumentName="AWS-RunShellScript",
             Comment=f"{action} {version}",
-            Parameters={"commands": commands,},
+            Parameters={"commands": commands},
         )
 
     def add_public_key(self, public_key, new_version):
@@ -86,8 +90,10 @@ class SSM:
         paginator = ec2.get_paginator("describe_instances")
         filters = [{"Name": "instance-id", "Values": instance_ids}]
 
+        logger.debug("get_private_ips: describe instances")
         page_iter = paginator.paginate(Filters=filters)
         for page in page_iter:
+            logger.debug("get_private_ips: got page", extra={"page": page})
             for r in page["Reservations"]:
                 for i in r["Instances"]:
                     if len(i["NetworkInterfaces"]) != 0:
@@ -98,6 +104,7 @@ class SSM:
 
     def get_addrs_for_add_key(self, new_version):
         instance_ids = []
+        logger.debug("get_addrs_for_add_key: list_commands")
         paginator = self.client.get_paginator("list_commands")
 
         now = datetime.datetime.now()
@@ -112,10 +119,20 @@ class SSM:
         # AND have status Success
         # => return the Private IP addresses for Instance IDs in this command
         command_id = None
+
+        logger.debug(
+            "get_addrs_for_add_key: paginating ",
+            extra={
+                "search_comment": search_comment,
+                "search_start_iso": search_start_iso,
+            },
+        )
+
         page_iter = paginator.paginate(
             Filters=[{"key": "InvokedAfter", "value": search_start_iso}]
         )
         for page in page_iter:
+            logger.debug("get_addrs_for_add_key: got page", extra={"page": page})
             for c in page["Commands"]:
                 if "Comment" in c:
                     comment = c["Comment"]
@@ -130,11 +147,21 @@ class SSM:
                 f"Could not find Successful Run Command with comment 'add_key {new_version}'",
             )
 
+        logger.debug(
+            "get_addrs_for_add_key: got command id", extra={"command_id": command_id}
+        )
+
         paginator = self.client.get_paginator("list_command_invocations")
         page_iter = paginator.paginate(CommandId=command_id)
+
+        logger.debug("get_addrs_for_add_key: list command invocations")
         for page in page_iter:
+            logger.debug("get_addrs_for_add_key: got command invocations page")
             for c in page["CommandInvocations"]:
                 instance_ids.append(c["InstanceId"])
 
+        logger.debug(
+            "get_addrs_for_add_key: instance ids", extra={"instance_ids": instance_ids}
+        )
         ip_addresses = self.get_private_ips(instance_ids)
         return ip_addresses
