@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.0.0](https://gitlab.com/guardianproject-ops/terraform-aws-lambda-secrets-manager-ssh-key-rotation/compare/1.0.0...2.0.0) (2021-03-02)
+
+
+### ⚠ BREAKING CHANGES
+
+* build the lambda locally using docker for maximum compatibility
+
+### Features
+
+* build the lambda locally using docker for maximum compatibility ([6c5a022](https://gitlab.com/guardianproject-ops/terraform-aws-lambda-secrets-manager-ssh-key-rotation/commit/6c5a02294eb1e1452e3d3e817316572813e1b57c))
+
+
+### Bug Fixes
+
+* add debug logging to test phase ([49f62f9](https://gitlab.com/guardianproject-ops/terraform-aws-lambda-secrets-manager-ssh-key-rotation/commit/49f62f9817e98648ca151cfa233c88de0bf117eb))
+
 ## [1.0.0](https://gitlab.com/guardianproject-ops/terraform-aws-lambda-secrets-manager-ssh-key-rotation/compare/0.1.2...1.0.0) (2021-02-05)
 
 
