@@ -133,7 +133,8 @@ resource "aws_security_group_rule" "ingress" {
 }
 
 module "lambda_function" {
-  source = "terraform-aws-modules/lambda/aws"
+  source  = "terraform-aws-modules/lambda/aws"
+  version = "1.48.0"
 
   function_name = module.label.id
   description   = "Rotates SSH keys on EC2 instances"
