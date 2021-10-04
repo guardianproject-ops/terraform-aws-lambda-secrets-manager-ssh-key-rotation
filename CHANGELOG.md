@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.0.1](https://gitlab.com/guardianproject-ops/terraform-aws-lambda-secrets-manager-ssh-key-rotation/compare/2.0.0...2.0.1) (2021-10-04)
+
+
+### Bug Fixes
+
+* Pin lambda module version ([82baf1d](https://gitlab.com/guardianproject-ops/terraform-aws-lambda-secrets-manager-ssh-key-rotation/commit/82baf1d8fb03a896b88e997e1e3221e0b473d1b3))
+
 ## [2.0.0](https://gitlab.com/guardianproject-ops/terraform-aws-lambda-secrets-manager-ssh-key-rotation/compare/1.0.0...2.0.0) (2021-03-02)
 
 
