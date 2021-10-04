@@ -42,7 +42,7 @@ data "aws_iam_policy_document" "lambda" {
     condition {
       test     = "StringEquals"
       variable = "secretsmanager:resource/AllowRotationLambdaArn"
-      values   = [module.lambda_function.this_lambda_function_arn]
+      values   = [module.lambda_function.lambda_function_arn]
     }
   }
   statement {
@@ -134,7 +134,7 @@ resource "aws_security_group_rule" "ingress" {
 
 module "lambda_function" {
   source  = "terraform-aws-modules/lambda/aws"
-  version = "1.48.0"
+  version = "2.20.0"
 
   function_name = module.label.id
   description   = "Rotates SSH keys on EC2 instances"
