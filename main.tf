@@ -168,6 +168,7 @@ module "lambda_function" {
     TAGVALUE  = var.tag_value
     LOG_LEVEL = var.lambda_log_level
   }
+  hash_extra = var.hash_extra
 
   build_in_docker   = true
   docker_file       = "${path.module}/lambda/Dockerfile"

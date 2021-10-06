@@ -53,3 +53,9 @@ variable "lambda_log_level" {
   type        = string
   default     = "INFO"
 }
+
+variable "hash_extra" {
+  type        = string
+  default     = ""
+  description = "The string to add into hashing function. Changing this causes a rebuild of the lambda source code."
+}
