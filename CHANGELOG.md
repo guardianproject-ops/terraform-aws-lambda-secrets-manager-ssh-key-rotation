@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.1.0](https://gitlab.com/guardianproject-ops/terraform-aws-lambda-secrets-manager-ssh-key-rotation/compare/3.0.0...3.1.0) (2021-10-06)
+
+
+### Features
+
+* Add optional hash_extra variable ([ed8dde4](https://gitlab.com/guardianproject-ops/terraform-aws-lambda-secrets-manager-ssh-key-rotation/commit/ed8dde48f457b7aae77a175f284dd7c8ea10dd89))
+
+
+### Bug Fixes
+
+* Use amazon official image for building the lambda ([a97e0ee](https://gitlab.com/guardianproject-ops/terraform-aws-lambda-secrets-manager-ssh-key-rotation/commit/a97e0ee28a80a70ef2885b663076060e2aa44a07))
+
 ## [3.0.0](https://gitlab.com/guardianproject-ops/terraform-aws-lambda-secrets-manager-ssh-key-rotation/compare/2.0.1...3.0.0) (2021-10-04)
 
 
